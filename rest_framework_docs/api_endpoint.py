@@ -2,6 +2,8 @@ import json
 import inspect
 
 from django.contrib.admindocs.views import simplify_regex
+from django.urls import URLPattern
+from django.urls.resolvers import RoutePattern, RegexPattern
 from rest_framework.viewsets import ViewSetMixin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.encoding import force_str, force_text
@@ -57,9 +59,16 @@ class ApiEndpoint(object):
         self.permissions = self.__get_permissions_class__()
 
     def __get_path__(self, parent_regex):
-        if parent_regex:
-            return "/{0}{1}".format(self.name_parent, simplify_regex(self.pattern.regex.pattern))
-        return simplify_regex(self.pattern.regex.pattern)
+        pattern = self.pattern.pattern
+
+        if isinstance(pattern, RegexPattern):
+            if parent_regex:
+                return "/{0}{1}".format(self.name_parent, simplify_regex(pattern.regex.pattern))
+            return simplify_regex(pattern.regex.pattern)
+        elif isinstance(pattern, RoutePattern):
+            if parent_regex:
+                return "/{0}{1}".format(self.name_parent, pattern._route)
+            return self.pattern._route
 
     def is_method_allowed(self, callback_cls, method_name):
         has_attr = hasattr(callback_cls, method_name)
@@ -165,6 +174,8 @@ class ApiEndpoint(object):
 
         """
         if isinstance(field, PrimaryKeyRelatedField):
+            if field.queryset is None:
+                return None
             return ['Related field ' + str(field.queryset.model)]
 
         if hasattr(field, 'choices'):
