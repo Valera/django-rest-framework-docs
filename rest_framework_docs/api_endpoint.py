@@ -67,7 +67,7 @@ class ApiEndpoint(object):
             return simplify_regex(pattern.regex.pattern)
         elif isinstance(pattern, RoutePattern):
             if parent_regex:
-                return "/{0}{1}".format(self.name_parent, pattern._route)
+                return "/{0}/{1}".format(self.name_parent, pattern._route)
             return self.pattern._route
 
     def is_method_allowed(self, callback_cls, method_name):
