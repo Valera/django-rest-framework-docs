@@ -73,7 +73,7 @@ class ApiEndpoint(object):
     def is_method_allowed(self, callback_cls, method_name):
         has_attr = hasattr(callback_cls, method_name)
         viewset_method = (issubclass(callback_cls, ViewSetMixin) and
-                          hasattr(callback_cls, VIEWSET_METHODS.get(self.callback.suffix, {}).get(method_name, '')))
+                          hasattr(callback_cls, VIEWSET_METHODS.get(self.callback.initkwargs.get('suffix'), {}).get(method_name, '')))
 
         try:  # fix for detail_routes and list_routes
             b = method_name in self.callback.actions
